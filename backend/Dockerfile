@@ -1,8 +1,10 @@
-FROM alpine
+FROM node:19-alpine3.15
 
 WORKDIR /app
-COPY package*.json /
 
-CMD npm install
+COPY package*.json ./
+
+RUN sudo apt install npm
 COPY . .
-CMD ["npm","start"]
+EXPOSE 5000
+CMD ["npm", "start"]
