@@ -1,16 +1,11 @@
 # Defining the base image.
-FROM alpine
+FROM node:19-alpine3.15
 
-# Changing work directory to /app.
 WORKDIR /app
 
-# Need to install all dependencies.
-CMD sudo apt-get install npm
+RUN npm install
 
-# Copying the application to this directory.
 COPY . .
 
-# Choosing a port.
-EXPOSE 8000
-
+CMD [ "npm", "start" ]
 VOLUME [ "/app" ]
