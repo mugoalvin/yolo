@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN sudo apt install npm
+
 COPY . .
 EXPOSE 5000
-CMD ["npm", "start"]
+CMD ["npm", "install"] && ["npm", "start"]
