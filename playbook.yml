@@ -1,26 +1,71 @@
 ---
 
-- name: Yolo Playbook
-  hosts: all
-  become: true
+- hosts: all
+  become: yes
+
   vars:
-    repo: "https://github.com/mugoalvin/yolo"
-    dest: "/home/alvin/yolo IP2"
+    docker_network_name: custom-network
+
+  pre_tasks:
+  - name: Update apt cache if needed
+    apt: update_cache=yes cache_valid_time=3600
+
+  - name: "Install required dependencies"
+    apt: 
+      state: present
+      name: 
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+        - python3-pip
+        - virtualenv
+        - python3-setuptools
+
+  - name: "Clone repository"
+    git:
+      repo: https://github.com/mugoalvin/yolo.git
+      dest: /alvin/yoloIP2
+      clone: yes
+      update: yes
+  
+  roles:
+    - setup-docker
+    - client
+    - backend
+
   tasks:
-    - name: Install Git
-      include_role:
-        name: git
-    
-    - name: checkout git repo
-      git:
-        repo: "{{ repo }}"
-        dest: "{{ dest }}"
+  - name: "Start mongodb container"
+    docker_container:
+      name: mongodb
+      image: mongo:latest
+      volumes:
+      - backend-mongodb:/data/db
+      networks:
+      - name: yolo_yolo_network
+      
+  - name: "Run the backend container"
+    docker_container:
+      name: yolo_backend_container
+      image: yolo_backend_image
+      state: started
+      command: npm start
+      env:
+        MONGODB_URI: mongodb://mongodb:27017/yolo
+      ports: 
+      - "5050:5050"
+      tty: true
+      networks: 
+      - name: yolo_yolo_network
 
-
-    - name: Install Docker
-      include_role:
-        name: docker
-
-    - name: Install image and container for the applicaton
-      include_role:
-        name: docker-compose
+  - name: "Run the client container"
+    docker_container:
+      name: yolo_client_container
+      image: yolo_client_image
+      state: started
+      command: npm start
+      ports: 
+      - "3000:3000"
+      tty: true
+      networks: 
+      - name: yolo_yolo_network
