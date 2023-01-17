@@ -1,5 +1,5 @@
-
 ---
+
 - name: Yolo Playbook
   hosts: all
   become: true
@@ -24,12 +24,3 @@
     - name: Install image and container for the applicaton
       include_role:
         name: docker-compose
-
-
-        
-        
-        
-
-       
-
-
